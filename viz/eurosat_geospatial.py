@@ -3,6 +3,7 @@ from rasterio.plot import show
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
+import pandas as pd
 import geopandas as gpd
 
 
@@ -17,19 +18,21 @@ def show_image(file_path):
     jpg = np.array(Image.open(file_path))
     plt.imshow(jpg)
 
-def plot_world_map(lat, lon, labels):
+def plot_world_map(gdf):
     # From GeoPandas, our world map data
     worldmap = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
+    print(worldmap.crs)
 
     fig, ax = plt.subplots(figsize=(12, 6))
     worldmap.plot(color="lightgrey", ax=ax)
 
     # Plotting our Impact Energy data with a color map
-    x = lon
-    y = lat
-    z = 60
-    plt.scatter(x, y, s=z, c="k", alpha=0.6, vmin=0, cmap='autumn')
-
+    # x = lon
+    # y = lat
+    # z = 60
+    # plt.scatter(x, y, s=z, c="k", alpha=0.6, vmin=0, cmap='autumn')
+    print(gdf.head())
+    gdf.plot(ax=ax, color="red")
     # Creating axis limits and title
     plt.xlim([-180, 180])
     plt.ylim([-90, 90])
@@ -38,10 +41,21 @@ def plot_world_map(lat, lon, labels):
     plt.ylabel("Latitude")
     plt.show()
 
+def create_gdf(lat, lon, crs):
+
+    df = pd.DataFrame(
+        {"Latitude": lat,
+        "Longitude": lon}
+    )
+    gdf = gpd.GeoDataFrame(
+    df, geometry=gpd.points_from_xy(df.Longitude, df.Latitude))
+    gdf = gdf.set_crs(crs)
+    return gdf
+
 if __name__ == "__main__":
-    i = 1500
+    i = 1900
     # jpg
-    file_path = f"data/EuroSAT/2750/AnnualCrop/AnnualCrop_{i}.jpg"
+    file_path = f"data/EuroSAT/2750/Industrial/Industrial_{i}.jpg"
     show_image(file_path)
     plt.pause(0.5)
 
@@ -52,10 +66,13 @@ if __name__ == "__main__":
     show_geospatial_image(file_path)
     plt.pause(0.5)
 
-    #TODO: fix crs system and add labels to legend
-    print(tiff.crs)
+    #TODO: labels to legend
     labels = ['AnnualCrop','Forest', 'HerbaceousVegetation', 'Highway',"Industrial", 'Pasture', 'PermanentCrop','Residential', 'River', 'SeaLake']
-    plot_world_map([tiff.bounds.top / 100000],[tiff.bounds.left / 100000],  labels)
-
+    
+    lat = [tiff.bounds.top  / 100000]
+    lon = [tiff.bounds.left / 100000]
+    crs = tiff.crs
+    gdf = create_gdf(lat, lon, crs)
+    plot_world_map(gdf)
 
 
