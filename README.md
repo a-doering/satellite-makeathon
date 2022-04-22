@@ -12,4 +12,7 @@ conda create -n sat python=3.8
 conda activate sat
 pip install --upgrade pip
 pip install -r requirements.txt
+
+# For jupyter (in vscode)
+conda install -n sat ipykernel
 ```
