@@ -2,6 +2,17 @@
 <html lanf="en" dir="ltr">
 
 <style>
+    @font-face {
+        font-family: 'Roboto';
+        src: url('roboto.eot');
+        /* IE9 Compat Modes */
+        src: url('roboto.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+        url('roboto.woff') format('woff'), /* Modern Browsers */
+        url('roboto.ttf') format('truetype'), /* Safari, Android, iOS */
+        url('roboto.svg#svgFontName') format('svg');
+        /* Legacy iOS */
+    }
+    
     button {
         background-color: #4CAF50;
         /* Green */
@@ -16,6 +27,7 @@
     
     .marg {
         margin-top: 1em;
+        margin-left: 1em
     }
     
     .file-input::-webkit-file-upload-button {
@@ -54,7 +66,7 @@
         margin: 0;
         font-family: Arial, Helvetica, sans-serif;
         background-color: rgb(253, 250, 247);
-        font-family: serif;
+        font-family: 'Roboto', sans-serif;
     }
     
     .header {
@@ -85,7 +97,7 @@
     }
     
     .header a.active {
-        background-color: dodgerblue;
+        background-color: rgb(37, 166, 93);
         color: white;
     }
     
@@ -103,6 +115,98 @@
             float: none;
         }
     }
+    
+    .btn {
+        border-radius: 4px;
+        padding: 8px 20px;
+    }
+    
+    .headItems {
+        padding: 15px 0
+    }
+    
+    table,
+    th,
+    td {
+        border: 1px solid black;
+    }
+    
+    .my-legend .legend-title {
+        text-align: left;
+        margin-bottom: 8px;
+        font-weight: bold;
+        font-size: 90%;
+    }
+    
+    .my-legend .legend-scale ul {
+        margin: 0;
+        padding: 0;
+        float: left;
+        list-style: none;
+    }
+    
+    .my-legend .legend-scale ul li {
+        display: block;
+        float: left;
+        width: 50px;
+        margin-bottom: 6px;
+        text-align: center;
+        font-size: 80%;
+        list-style: none;
+    }
+    
+    .my-legend ul.legend-labels li span {
+        display: block;
+        float: left;
+        height: 15px;
+        width: 50px;
+    }
+    
+    .my-legend .legend-source {
+        font-size: 70%;
+        color: #999;
+        clear: both;
+    }
+    
+    .my-legend a {
+        color: #777;
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+    
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+    }
+    
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    
+    .close:hover,
+    .close:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+    }
 </style>
 
 <head>
@@ -113,23 +217,88 @@
 
 <body>
     <div class="header">
-        <a href="#default" class="logo">Bonk</a>
-        <div class="header-right">
+        <img style="float: left" src="BONK.png" width="80">
+        <a href="#default" style="padding: 30px 0; margin-left: 0.5em">BONK</a>
+        <div class="header-right headItems">
             <a class="active" href="#home">Home</a>
             <a href="#contact">Contact</a>
             <a href="#about">About</a>
         </div>
     </div>
     <div class="row marg">
-        <label> Choose the File to upload: </label>
-        <input type="file" class="file-input" id="file" onchange="showIn(event)" accept="image/*" />
-        <button onclick="showOut()">Submit</button>
+        <label> Fill the values: </label>
+        <div>
+
+        </div>
+        <input type="text" placeholder="Latitude" />
+        <input type="text" placeholder="Longitude" />
+        <button class="btn" style="background-color: rgb(37, 166, 93);" onclick="showIn()">Submit coordinates</button>
+        <button class="btn" style="background-color: rgb(21, 100, 55);" onclick="showOut()">Process</button>
     </div>
     <div class="row marg">
-        <img id="inImg" width="400">
-        <img style="visibility: hidden" id="outImg" src="dioca_out.jpg" width="400">
+        <img style="visibility: hidden; border: 2px solid rgb(37, 166, 93);" id="inImg" src="input.jpg" width="400">
+        <img style="visibility: hidden; padding: 190px 0" id="arrow" src="arrow.jpg" width="70">
+        <img style="visibility: hidden; border: 2px solid rgb(37, 166, 93);" id="outImg" src="dioca_out.jpg" width="400">
+        <img style="visibility: hidden;" id="wait" src="giphy.gif" width="200">
+        <i id="loading" style="visibility: hidden">Loading...</i>
     </div>
 
+    <div id="legend" class='my-legend' style="visibility: hidden; padding-left: 550px;">
+        <div class='legend-title' style="padding-left: 55px;">N concentration in <i>mg-N/kg</i></div>
+        <div class='legend-scale'>
+            <ul class='legend-labels'>
+                <li><span class="modalBtns" data-modal="modal1" style='background-image: linear-gradient(45deg, #d2ced9 25%, #727075 25%, #727075 50%, #d2ced9 50%, #d2ced9 75%, #727075 75%, #727075 100%);'></span>50-73</li>
+                <li><span class="modalBtns" data-modal="modal2" style='background:#acc8e1;'></span>74-86</li>
+                <li><span class="modalBtns" data-modal="modal3" style='background:#adebe1;'></span>87-99</li>
+                <li><span class="modalBtns" data-modal="modal4" style='background:#ddf4cf;'></span>100-112</li>
+                <li><span class="modalBtns" data-modal="modal5" style='background:#eedfb1;'></span>113-125</li>
+                <li><span class="modalBtns" data-modal="modal6" style='background:#9d5148;'></span>>126</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal="modal1">&times;</span>
+            <p>Adequate nitrogen concentration! You can spare your fertilizers and money for these locations.</p>
+            <img src="stonks.jpg" width="200">
+        </div>
+    </div>
+
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal="modal2">&times;</span>
+            <p> Nitrogen concentration is higher than usual! Suggested avoidance of further use of fertilizer. </p>
+        </div>
+    </div>
+
+    <div id="modal3" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal="modal3">&times;</span>
+            <p>Nitrogen concentration is higher than usual! Suggested avoidance of further use of fertilizer. </p>
+        </div>
+    </div>
+
+    <div id="modal4" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal="modal4">&times;</span>
+            <p>Nitrogen concentration is higher than usual! Suggested avoidance of further use of fertilizer. </p>
+        </div>
+    </div>
+
+    <div id="modal5" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal="modal5">&times;</span>
+            <p>Very high nitrogen fixation. Suggested avoidance of further use of fertilizer. You can contact BONK for a consultation. </p>
+        </div>
+    </div>
+
+    <div id="modal6" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal="modal6">&times;</span>
+            <p>Nitrogen concentration is super high! It can lead to groundwater pollution and general environmental problems. Please use fertilizers with care.</p>
+        </div>
+    </div>
 
     <script defer src="index.js" charset="utf-8"></script>
 </body>
